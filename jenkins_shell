@@ -1,0 +1,24 @@
+sudo docker-compose  stop
+sudo docker-compose  rm --force -v
+
+#build the system
+sudo docker-compose  build --no-cache
+sudo docker-compose  up -d
+
+#Run unit tests since no env specified so it picks from docker-compose file
+sudo docker-compose  run --no-deps --rm  web
+ERR=$?
+
+echo $ERR
+
+    
+if [ $ERR -eq 0 ]; then
+	HASH=$(git rev-parse --short HEAD)
+    sudo docker tag  chatserverjenkins msuhail/chatserver:$HASH
+    sudo docker tag chatserverjenkins msuhail/chatserver:newest
+    echo "Pushing"
+    sudo docker login -u msuhail -p Cricket_123
+    sudo docker push msuhail/chatserver:$HASH
+    sudo docker push msuhail/chatserver:newest
+fi
+return $ERR
